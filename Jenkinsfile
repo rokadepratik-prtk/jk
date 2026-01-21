@@ -1,18 +1,20 @@
 pipeline {
-    agent any
-    environment {
-        ENVIRONMENT = "DEV"   // set a default value here
+  agent any
+  stages {
+    stage('Build') {
+      steps {
+        echo "Building project for ${ENVIRONMENT} environment"
+      }
     }
-    stages {
-        stage('Build') {
-            steps {
-                echo "Building project for ${ENVIRONMENT} environment"
-            }
-        }
-        stage('Test') {
-            steps {
-                echo "Running tests in ${ENVIRONMENT} environment"
-            }
-        }
+
+    stage('Test') {
+      steps {
+        echo "Running tests in ${ENVIRONMENT} environment"
+      }
     }
+
+  }
+  environment {
+    ENVIRONMENT = 'DEV'
+  }
 }
