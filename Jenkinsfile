@@ -1,7 +1,7 @@
 pipeline {
     agent any
     environment {
-        ENVIRONMENT = "${ENVIRONMENT}"
+        ENVIRONMENT = "DEV"   // set a default value here
     }
     stages {
         stage('Build') {
