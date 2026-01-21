@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberSecure Hub</title>
+  <style>
+  body {
+    margin: 0;
+    font-family: 'Courier New', monospace;
+    background: #000;
+    color: #eee; /* default text is light gray for readability */
+    overflow-x: hidden;
+  }
+
+  /* Binary Rain Background */
+  canvas {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: -1;
+  }
+
+  nav {
+    background: rgba(0,0,0,0.8);
+    padding: 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: sticky;
+    top: 0;
+    border-bottom: 1px solid #0f0;
+  }
+  nav h2 { 
+    margin: 0; 
+    color: #0ff; /* cyan for logo */
+    text-shadow: 0 0 10px #0ff; 
+  }
+  nav ul { list-style: none; display: flex; gap: 20px; }
+  nav ul li { cursor: pointer; transition: color 0.3s; color: #eee; }
+  nav ul li:hover { color: #ff0; }
+
+  .hero {
+    text-align: center;
+    padding: 100px 20px;
+  }
+  .hero h1 {
+    font-size: 3em;
+    color: #0ff; /* cyan hero title */
+    text-shadow: 0 0 20px #0ff;
+    animation: glitch 2s infinite;
+  }
+  .hero p { font-size: 1.2em; color: #ccc; }
+
+  @keyframes glitch {
+    0% { text-shadow: 2px 2px #f00; }
+    25% { text-shadow: -2px -2px #0ff; }
+    50% { text-shadow: 2px -2px #ff0; }
+    75% { text-shadow: -2px 2px #f0f; }
+    100% { text-shadow: 0 0 20px #0ff; }
+  }
+
+  section { padding: 60px 20px; text-align: center; }
+
+  .card {
+    background: rgba(0,255,0,0.05);
+    padding: 20px;
+    margin: 15px;
+    border-radius: 10px;
+    display: inline-block;
+    width: 250px;
+    border: 1px solid #0f0;
+    box-shadow: 0 0 15px #0f0;
+    transition: transform 0.3s;
+    color: #fff; /* white text inside cards */
+  }
+  .card:hover { transform: scale(1.05); box-shadow: 0 0 25px #ff0; }
+
+  /* Password Strength Meter */
+  #meter {
+    width: 300px;
+    height: 15px;
+    background: #111;
+    border-radius: 10px;
+    margin: 10px auto;
+    overflow: hidden;
+    border: 1px solid #0f0;
+  }
+  #meter div {
+    height: 100%;
+    width: 0;
+    background: red;
+    transition: width 0.5s, background 0.5s;
+  }
+  #strength {
+    color: #fff; /* feedback text visible */
+    margin-top: 5px;
+  }
+
+  /* Quiz */
+  .quiz-option { 
+    display: block; 
+    margin: 5px; 
+    cursor: pointer; 
+    color: #0ff; /* cyan options */
+  }
+  .quiz-option:hover { background: rgba(0,255,255,0.2); }
+
+  footer {
+    background: #111;
+    padding: 20px;
+    text-align: center;
+    color: #ccc; /* softer gray footer text */
+    border-top: 1px solid #0f0;
+  }
+  footer a { color: #0ff; text-decoration: none; }
+  footer a:hover { color: #ff0; }
+</style>
+
+</head>
+<body>
+  <canvas id="matrix"></canvas>
+
+  <nav>
+    <h2>CyberSecure Hub</h2>
+    <ul>
+      <li onclick="scrollToSection('about')">About</li>
+      <li onclick="scrollToSection('threats')">Threats</li>
+      <li onclick="scrollToSection('tips')">Best Practices</li>
+      <li onclick="scrollToSection('demo')">Demo</li>
+      <li onclick="scrollToSection('quiz')">Quiz</li>
+    </ul>
+  </nav>
+
+  <div class="hero">
+    <h1>⚡ Stay Safe Online ⚡</h1>
+    <p>Cybersecurity awareness with a futuristic edge.</p>
+  </div>
+
+  <section id="about">
+    <h2>What is Cybersecurity?</h2>
+    <p>Cybersecurity protects systems, networks, and programs from digital attacks.</p>
+  </section>
+
+  <section id="threats">
+    <h2>Common Threats</h2>
+    <div class="card">🎣 Phishing</div>
+    <div class="card">🦠 Malware</div>
+    <div class="card">💰 Ransomware</div>
+    <div class="card">🕵️ Social Engineering</div>
+  </section>
+
+  <section id="tips">
+    <h2>Best Practices</h2>
+    <p>✔ Strong passwords<br>✔ Two-factor authentication<br>✔ Software updates<br>✔ Email caution</p>
+  </section>
+
+  <section id="demo">
+    <h2>Password Strength Checker</h2>
+    <input type="password" id="password" placeholder="Enter password" oninput="checkStrength()">
+    <div id="meter"><div></div></div>
+    <div id="strength"></div>
+  </section>
+
+  <section id="quiz">
+    <h2>Cybersecurity Quiz</h2>
+    <p>Which is the safest password?</p>
+    <span class="quiz-option" onclick="checkAnswer(false)">password123</span>
+    <span class="quiz-option" onclick="checkAnswer(false)">john2020</span>
+    <span class="quiz-option" onclick="checkAnswer(true)">T!m3$@fe#2026</span>
+    <div id="quiz-result"></div>
+  </section>
+
+  <footer>
+    <p>Resources: <a href="https://owasp.org" target="_blank">OWASP</a> | <a href="https://www.cert.org" target="_blank">CERT</a></p>
+    <p>&copy; 2026 CyberSecure Hub</p>
+  </footer>
+
+  <script>
+//     // Smooth scroll
+//     function scrollToSection(id) {
+//       document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+//     }
+
+//     // Password strength meter
+//     function checkStrength() {
+//       const pwd = document.getElementById('password').value;
+//       const meter = document.querySelector('#meter div');
+//       const strength = document.getElementById('strength');
+//       let score = 0;
+
+//       if (pwd.length >= 6) score++;
+//       if (/[A-Z]/.test(pwd)) score++;
+//       if (/[0-9]/.test(pwd)) score++;
+//       if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+//       meter.style.width = (score * 25) + "%";
+//       if (score <= 1) { meter.style.background = "red"; strength.textContent = "Weak ❌"; }
+//       else if (score == 2) { meter.style.background = "orange"; strength.textContent = "Medium ⚠️"; }
+//       else if (score >= 3) { meter.style.background = "lime"; strength.textContent = "Strong ✅"; }
+//     }
+
+//     // Quiz
+//     function checkAnswer(correct) {
+//       const result = document.getElementById('quiz-result');
+//       if (correct) {
+//         result.textContent = "Correct! Strong passwords use symbols, numbers, and uppercase letters.";
+//         result.style.color = "lime";
+//       } else {
+//         result.textContent = "Oops! That password is too weak.";
+//         result.style.color = "red";
+//       }
+//     }
+
+//     // Matrix binary rain background
+//     const canvas = document.getElementById("matrix");
+//     const ctx = canvas.getContext("2d");
+//     canvas.height = window.innerHeight;
+//     canvas.width = window.innerWidth;
+
+    
+    
+
+//     const letters = "01";
+//     const fontSize = 14;
+//     const columns = canvas.width / fontSize;
+//     const drops = [];
+
+//     for (let x = 0; x < columns; x++) {
+//       drops[x] = 1;
+//     }
+
+//     function draw() {
+//   // translucent background for trail effect
+//   ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+//   ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+//   ctx.fillStyle = "#0F0"; // green text
+//   ctx.font = fontSize + "px monospace";
+
+//   // Loop over drops
+//   for (let i = 0; i < drops.length; i++) {
+//     // Pick a random character (0 or 1)
+//     const text = letters.charAt(Math.floor(Math.random() * letters.length));
+//     ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+//     // Reset drop to top randomly after it passes screen height
+//     if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+//       drops[i] = 0;
+//     }
+
+//     // Move drop down
+//     drops[i]++;
+//   }
+// }
+
+// // Run draw function every 33ms (~30fps)
+// setInterval(draw, 33);
+
+
+
+
+
+
+// Smooth scroll for navigation
+function scrollToSection(id) {
+  document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+}
+
+// Password strength meter
+function checkStrength() {
+  const pwd = document.getElementById('password').value;
+  const meter = document.querySelector('#meter div');
+  const strength = document.getElementById('strength');
+  let score = 0;
+
+  if (pwd.length >= 6) score++;
+  if (/[A-Z]/.test(pwd)) score++;
+  if (/[0-9]/.test(pwd)) score++;
+  if (/[^A-Za-z0-9]/.test(pwd)) score++;
+
+  meter.style.width = (score * 25) + "%";
+  if (score <= 1) { meter.style.background = "red"; strength.textContent = "Weak ❌"; }
+  else if (score == 2) { meter.style.background = "orange"; strength.textContent = "Medium ⚠️"; }
+  else if (score >= 3) { meter.style.background = "lime"; strength.textContent = "Strong ✅"; }
+}
+
+// Quiz logic
+function checkAnswer(correct) {
+  const result = document.getElementById('quiz-result');
+  if (correct) {
+    result.textContent = "Correct! Strong passwords use symbols, numbers, and uppercase letters.";
+    result.style.color = "lime";
+  } else {
+    result.textContent = "Oops! That password is too weak.";
+    result.style.color = "red";
+  }
+}
+
+// Matrix hex rain background
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+
+// Hexadecimal characters
+const letters = "0123456789ABCDEF";
+const fontSize = 16;
+const columns = canvas.width / fontSize;
+const drops = [];
+
+// Initialize drops
+for (let x = 0; x < columns; x++) {
+  drops[x] = 1;
+}
+
+function draw() {
+  // Trail effect
+  ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  ctx.font = fontSize + "px monospace";
+
+  // Loop over drops
+  for (let i = 0; i < drops.length; i++) {
+    const text = letters.charAt(Math.floor(Math.random() * letters.length));
+
+    // Occasionally flash red "alert" characters
+    if (Math.random() > 0.98) {
+      ctx.fillStyle = "#F00"; // red alert
+    } else {
+      ctx.fillStyle = "#0F0"; // normal green
+    }
+
+    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+    // Reset drop randomly
+    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+      drops[i] = 0;
+    }
+
+    drops[i]++;
+  }
+}
+
+// Run draw function every 33ms (~30fps)
+setInterval(draw, 33);
+
+// Responsive resize
+window.addEventListener("resize", () => {
+  canvas.height = window.innerHeight;
+  canvas.width = window.innerWidth;
+});
+
+</script>
+ </body>
+ </html>
